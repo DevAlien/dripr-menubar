@@ -1,0 +1,230 @@
+<html>
+<head>
+<title>Example App</title>
+<style>
+
+@charset "utf-8";
+/* CSS Document */
+
+/* ---------- FONTAWESOME ---------- */
+/* ---------- http://fortawesome.github.com/Font-Awesome/ ---------- */
+/* ---------- http://weloveiconfonts.com/ ---------- */
+
+@import url(http://weloveiconfonts.com/api/?family=fontawesome);
+
+/* ---------- ERIC MEYER'S RESET CSS ---------- */
+/* ---------- http://meyerweb.com/eric/tools/css/reset/ ---------- */
+
+@import url(http://meyerweb.com/eric/tools/css/reset/reset.css);
+
+/* ---------- FONTAWESOME ---------- */
+
+[class*="fontawesome-"]:before {
+  font-family: 'FontAwesome', sans-serif;
+}
+
+/* ---------- GENERAL ---------- */
+
+body {
+	background: #393937;
+  font: 87.5%/1.5em sans-serif;
+}
+
+input {
+	font-size: inherit;
+	margin: 0;
+	padding: 0;
+	-webkit-appearance: none;
+}
+
+/* ---------- LOGIN ---------- */
+
+#login {
+	margin: 15px auto;
+	width: 202px;
+}
+
+#login span {
+	color: #676767;
+	display: block;
+	height: 48px;
+	line-height: 48px;
+	position: absolute;
+	text-align: center;
+	width: 36px;
+}
+
+#login input {
+	border: none;
+	height: 48px;
+	outline: none;
+}
+
+#login input[type="text"] {
+	background: #dedede;
+	border-top: 1px solid #000;
+	border-right: 1px solid #000;
+	border-left: 1px solid #000;
+	border-radius: 5px 5px 0 0;
+	color: #363636;
+	padding-left: 36px;
+	width: 200px;
+}
+
+#login input[type="password"] {
+	background-color: #dedede;
+	border-top: 1px solid #828282;
+	border-right: 1px solid #000;
+	border-bottom: 1px solid #000;
+	border-left: 1px solid #000;
+	border-radius: 0 0 5px 5px;
+	color: #363636;
+	margin-bottom: 20px;
+	padding-left: 36px;
+	width: 200px;
+}
+
+#login input[type="submit"] {
+	background: #e14d4d;
+	border: 1px solid #391515;
+	border-radius: 5px;
+	color: #fff;
+	font-weight: bold;
+	line-height: 48px;
+	text-align: center;
+	text-transform: uppercase;
+	width: 200px;
+}
+
+#login input[type="submit"]:hover {
+	background: #f15958;
+}
+* {margin: 0; padding: 0;}
+
+span {
+  margin: 5px ;
+}
+
+ul {
+  list-style-type: none;
+  width: 250px;
+}
+ .img {
+    float:left;
+    width: 50px;
+    height: 50px;
+    background-position: 50% 50%;
+    background-repeat:no-repeat;
+    background-size: cover;
+    border-radius: 3px;
+}
+h3 {
+  font: bold 20px/1.5 Helvetica, Verdana, sans-serif;
+}
+
+li img {
+  float: left;
+  margin: 0 15px 0 0;
+}
+
+li p {
+  margin-top: 2px;
+  font: 200 12px/1.5 Georgia, Times New Roman, serif;
+}
+li a {
+    text-decoration:        none;
+  color:black;
+}
+li {
+  padding: 0px;
+  overflow: auto;
+  border-bottom: 1px black solid;
+}
+
+li:hover {
+  background: #eee;
+  cursor: pointer;
+}
+
+
+</style>
+<script>
+console.log(global)
+console.log(fetch)
+console.log(require('remote').getGlobal('conf').get('awesome'))
+const shell = require('shell');
+function asd(e) {
+  shell.openExternal('http://localhost:4000/file/' + e);
+}
+function login() {
+  console.log(document.getElementById('email'))
+  var email = document.getElementById('email').value
+  var password = document.getElementById('password').value
+  fetch('http://localhost:8101/login', {method: 'post', body: JSON.stringify({email: email, password: password}), withCredentials: 'include', headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }}).then(function(response) {
+    return response.json()
+  }).then(function(json) {
+    if(json.accessToken) {
+      console.log(require('remote').getGlobal('conf').set('user', json))
+      loadList();
+    }
+    console.log('parsed json', json)
+  }).catch(function(ex) {
+    console.log('parsing failed', ex)
+  })
+}
+
+function loadList() {
+  var user = require('remote').getGlobal('conf').get('user');
+  if(user && user.accessToken) {
+    fetch('http://localhost:8101/files', {method: 'get', withCredentials: 'include', headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + user.accessToken
+    }}).then(function(response) {
+      return response.json()
+    }).then(function(json) {
+
+      console.log('parsed json', json)
+      var data = '';
+      json.forEach(function(a) {
+        data += `<li onClick="asd('${a.hash}')">
+          <span class="img" style="background-image: url('${a.thumbnail}')"></span>
+          <p>${a.hash}</p>
+          <p>${a.type}</p>
+          <p>${a.type}</p>
+        </li>`;
+      })
+      document.getElementById('content').innerHTML = `<ul>
+        ${data}
+        </ul>`;
+    }).catch(function(ex) {
+      console.log('parsing failed', ex)
+    })
+
+  } else {
+    document.getElementById('content').innerHTML = `<div id="login">
+
+		<form action="javascript:login();" method="post">
+
+			<span class="fontawesome-email"></span><input type="text" id="email" required value="Email" onBlur="if(this.value=='')this.value='Email'" onFocus="if(this.value=='Email')this.value='' "> <!-- JS because of IE support; better: placeholder="Username" -->
+			<span class="fontawesome-lock"></span><input type="password" id="password" required value="Password" onBlur="if(this.value=='')this.value='Password'" onFocus="if(this.value=='Password')this.value='' "> <!-- JS because of IE support; better: placeholder="Password" -->
+			<input type="submit" value="Login">
+
+		</form>
+
+	</div>`;
+  }
+}
+
+</script>
+</head>
+<body>
+  <div id="content">
+
+</div>
+<script>loadList()</script>
+</body>
+</html>
