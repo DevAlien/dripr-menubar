@@ -1,0 +1,20 @@
+/**
+ * Copyright (c) 2015-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+#import <Cocoa/Cocoa.h>
+#import "RCTBridge.h"
+
+@interface AppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate>
+
+@property (strong, nonatomic) NSWindow *window;
+@property (strong, nonatomic) NSStatusItem *item;
+@property (strong, nonatomic) NSPopover *popover;
+@property (nonatomic, readonly) RCTBridge *bridge;
+
+@end
